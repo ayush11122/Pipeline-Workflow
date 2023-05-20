@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+    
+    tools { nodejs "node"}
+    
+    stages{
+        stage('build node') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ayush11122/Contact-App.git'
+                sh 'npm install'
+            }
+        }
+        stage('build docker image') {
+            steps{
+                sh 'docker build -t ayush11122/contact-app .'
+            }
+        }
+        stage('push to dockerhub') {
+            steps{
+                withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
+                sh 'docker login -u ayush11122 -p ${dockerhubpwd}'
+                }
+                sh 'docker push ayush11122/contact-app'
+            }
+        }
+    }
+}
